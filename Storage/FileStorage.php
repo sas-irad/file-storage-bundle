@@ -64,6 +64,23 @@ class FileStorage {
     }
     
     /**
+     * Acquire an exclusive lock on the storage file, retrieve the contents,
+     * and leave the file locked for a later update.
+     * @return string
+     */
+    public function getAndHold() {
+    
+        if ( file_exists($this->path) ) {
+            if ( $this->acquireExclusiveLock() ) {
+                $this->data = fread($this->fh, filesize($this->path));
+            }
+        }
+    
+        return $this->data;
+    }
+    
+    
+    /**
      * Save $data to the storage file
      * @param unknown $data
      */
@@ -78,6 +95,24 @@ class FileStorage {
             }
             $this->close();
         }
+    }
+
+    /**
+     * Assumes you have already opened and read the file with getAndHold(). This
+     * method writes back to the file and releases the lock.
+     * @param string $data
+     * @throws \Exception
+     */
+    public function saveAndRelease($data) {
+
+        $this->data = $data;
+        
+        fseek($this->fh, 0);
+        $result = fwrite($this->fh, $data);
+        if ( $result != strlen($data) ) {
+            throw new \Exception("Error writing to storage file: {$this->path}, data may be incomplete.");
+        }
+        $this->close();
     }
     
     /**
@@ -94,7 +129,7 @@ class FileStorage {
      * @return boolean
      */    
     private function acquireReadLock() {
-        $rc = $this->acquireLock(LOCK_SH);
+        $rc = $this->acquireLock(LOCK_SH, 'r');
         if (!$rc) {
             throw new \Exception("Unable to lock storage file for reading: {$this->path}");
         }
@@ -108,7 +143,7 @@ class FileStorage {
      * @throws \Exception
      */
     private function acquireWriteLock() {
-        $rc = $this->acquireLock(LOCK_EX);
+        $rc = $this->acquireLock(LOCK_EX, 'w');
         if (!$rc) {
             throw new \Exception("Unable to lock storage file for writing: {$this->path}");
         }
@@ -117,14 +152,26 @@ class FileStorage {
     }
     
     /**
+     * Open $this->path with exclusive lock for reading and writing
+     * @return boolean
+     * @throws \Exception
+     */
+    private function acquireExclusiveLock() {
+        $rc = $this->acquireLock(LOCK_EX, 'r+');
+        if (!$rc) {
+            throw new \Exception("Unable to lock storage file for read/write: {$this->path}");
+        }
+        // should always return true
+        return $rc;
+    }    
+    
+    /**
      * Open $this->path with either a READ or WRITE lock. Return true on success.
      * @param CONST $type (LOCK_EX|LOCK_SH)
      * @return boolean
      */
-    private function acquireLock($type) {
+    private function acquireLock($type, $mode) {
         
-        $mode = $type == LOCK_EX ? "w" : "r";
-
         if ( !file_exists($this->path) ) {
             touch($this->path);
             chmod($this->path, 0660);
