@@ -103,7 +103,7 @@ class FileStorageTest extends PHPUnit_Framework_TestCase {
     
         $fh = fopen($testWritePath, 'r');
         if ( !$fh ) {
-            throw new Exception("Error opening test file for write: $testWritePath");
+            throw new Exception("Error opening test file for read: $testWritePath");
         }
     
         if ( !flock($fh, LOCK_SH) ) {
@@ -172,7 +172,7 @@ class FileStorageTest extends PHPUnit_Framework_TestCase {
     
         $fh = fopen($testWritePath, 'r');
         if ( !$fh ) {
-            throw new Exception("Error opening test file for write: $testWritePath");
+            throw new Exception("Error opening test file for read: $testWritePath");
         }
     
         if ( !flock($fh, LOCK_SH) ) {
@@ -181,6 +181,60 @@ class FileStorageTest extends PHPUnit_Framework_TestCase {
     
         $storage = new FileStorage($testWritePath);
         $this->assertEquals($fileContents, $storage->get());
+    
+        fclose($fh);
+        unlink($testWritePath);
+    }    
+    
+    
+    /**
+     * Test getAndHold() to ensure file is properly locked
+     */
+    public function testGetAndHold() {
+    
+        $testWritePath = "/tmp/file-storage-test-write";
+        $fileContents  = "This is the content in my file!";
+    
+        if ( !file_put_contents($testWritePath, $fileContents) ) {
+            throw new Exception("Error creating test file: $testWritePath");
+        }
+    
+        $storage = new FileStorage($testWritePath);
+        
+        // did we read the file correctly
+        $this->assertEquals($fileContents, $storage->getAndHold());
+        
+        // the file should have an exclusive lock on it now
+        $fh = fopen($testWritePath, 'r');
+        if ( !$fh ) {
+            throw new Exception("Error opening test file for read: $testWritePath");
+        }
+    
+        // try to get a non-blocking lock (without non_block, we'll wait forever!)
+        if ( flock($fh, LOCK_SH | LOCK_NB) ) {
+            throw new Exception("Shouldn't be able to lock test file for share: $testWritePath");
+        }
+
+        if ( flock($fh, LOCK_EX | LOCK_NB) ) {
+            throw new Exception("Shouldn't be able to lock test file for write: $testWritePath");
+        }
+        
+        // update the file
+        $fileContents  = "This is the updated content in my file!";
+        $storage->saveAndRelease($fileContents);
+        
+        // file on disk should be updated
+        $this->assertEquals($fileContents, file_get_contents($testWritePath));
+        
+        // file locks should now work again
+            if ( !flock($fh, LOCK_SH) ) {
+            throw new Exception("Error locking test file for share: $testWritePath");
+        }
+                
+        if ( !flock($fh, LOCK_EX) ) {
+            throw new Exception("Error locking test file for write: $testWritePath");
+        }
+                
     
         fclose($fh);
         unlink($testWritePath);

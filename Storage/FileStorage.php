@@ -27,6 +27,7 @@ class FileStorage {
     const MAX_LOCK_RETRIES = 10;
     private $data = false;
     private $path;
+    private $temp_path;
     private $fh;
     
     /**
@@ -107,12 +108,23 @@ class FileStorage {
 
         $this->data = $data;
         
-        fseek($this->fh, 0);
-        $result = fwrite($this->fh, $data);
+        // write updates to our temp file
+        $temp = $this->openTempFile();
+
+        $result = fwrite($temp, $data);
         if ( $result != strlen($data) ) {
             throw new \Exception("Error writing to storage file: {$this->path}, data may be incomplete.");
         }
+        fclose($temp);
+        
+        if ( !rename($this->temp_path, $this->path) ) {
+            throw new \Exception("Error renaming tmp file");
+        }        
+        
+        // close and remove lock
         $this->close();
+        
+        return true;
     }
     
     /**
@@ -198,4 +210,24 @@ class FileStorage {
             fclose($this->fh);
         }
     }
+    
+    /**
+     * Open a temp file for writing
+     * @return resource
+     */
+    private function openTempFile() {
+		
+        $file = basename($this->path);
+        $dir  = dirname($this->path);
+        
+        $this->temp_path = tempnam($dir, $file . '.');
+        
+		$fhw = fopen($this->temp_path, 'w');
+		chmod($this->temp_path, 0660);
+		
+		if ( !$fhw ) {
+		    throw new \Exception("Error opening file '$this->temp_path'");
+		}
+		return $fhw;
+	}
 }
