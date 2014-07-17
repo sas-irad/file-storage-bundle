@@ -27,7 +27,7 @@ class GenerateKeysCommand extends ContainerAwareCommand {
         
         if ( !$key_path ) {
             $root_dir = $this->getContainer()->get('kernel')->getRootDir();
-            $key_path = "$root_dir/app/config/keys";
+            $key_path = "$root_dir/config/keys";
         }
         
         // create our "keys" directory if it doesn't exist
