@@ -3,5 +3,5 @@ services:
     file.storage:
         class:  SAS\IRAD\FileStorageBundle\Service\FileStorageService
         
-    file.decrypter:
-        class:  SAS\IRAD\FileStorageBundle\Service\FileDecrypterService
+    file.encrypted_storage:
+        class:  SAS\IRAD\FileStorageBundle\Service\EncryptedFileStorageService
