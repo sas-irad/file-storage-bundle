@@ -68,7 +68,7 @@ class EncryptPasswordCommand extends ContainerAwareCommand {
                       'private_key' => $private_key_path);
         
         $storage = $encrypted->init($pw_file, $keys); 
-        $storage->save($password);
+        $storage->save($password1);
         
         chmod($pw_file, 0660);
         
