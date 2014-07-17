@@ -72,7 +72,7 @@ class EncryptPasswordCommand extends ContainerAwareCommand {
         
         chmod($pw_file, 0660);
         
-        $output->writeln("Done.");
+        $output->writeln("Encrypted password written to: $pw_file");
     }
 
 }
