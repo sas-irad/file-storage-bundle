@@ -13,12 +13,10 @@ class GenerateKeysCommand extends ContainerAwareCommand {
 
     protected function configure() {
 
-        $rootDir = $this->getContainer()->get('kernel')->getRootDir();
-        
         $this
         ->setName('storage:generate-keys')
         ->setDescription('Generate encryption keys to encrypt data files at rest in the file system.')
-        ->addOption('path', null, InputOption::VALUE_REQUIRED, "Path for key files", "$rootDir/app/config/keys")
+        ->addOption('path', null, InputOption::VALUE_OPTIONAL, "Path for key files")
         ;
 
     }
@@ -26,6 +24,11 @@ class GenerateKeysCommand extends ContainerAwareCommand {
     protected function execute(InputInterface $input, OutputInterface $output) {
 
         $key_path = $input->getOption('path');
+        
+        if ( !$key_path ) {
+            $root_dir = $this->getContainer()->get('kernel')->getRootDir();
+            $key_path = "$root_dir/app/config/keys";
+        }
         
         // create our "keys" directory if it doesn't exist
         if ( !is_dir($key_path) ) {
