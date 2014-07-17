@@ -59,10 +59,14 @@ class GenerateKeysCommand extends ContainerAwareCommand {
         $public_key = $details["key"];
         
         $output->writeln("Exporting private key to $private_key_path");
-        file_put_contents($private_key_path, $private_key);
+        if ( !file_put_contents($private_key_path, $private_key) ) {
+            throw new \Exception("Error writing private key file: $private_key_path");
+        }
         
         $output->writeln("Exporting public key to $public_key_path");
-        file_put_contents($public_key_path, $public_key);
+        if ( !file_put_contents($public_key_path, $public_key) ) {
+            throw new \Exception("Error writing public key file: $public_key_path");
+        }
         
         chmod($private_key_path, 0660);
         chmod($public_key_path,  0660);
