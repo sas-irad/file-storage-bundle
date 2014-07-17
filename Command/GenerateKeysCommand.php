@@ -41,7 +41,7 @@ class GenerateKeysCommand extends ContainerAwareCommand {
 
         // don't overwrite keys if they already exist
         if ( file_exists($public_key_path) || file_exists($private_key_path) ) {
-            echo "Key files already exist. Please remove before generating new keys.\n";
+            throw new \Exception("Key files already exist. Please remove before generating new keys.");
             exit;
         }
         
