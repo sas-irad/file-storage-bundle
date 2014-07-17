@@ -118,11 +118,14 @@ class FileStorage {
         fclose($temp);
         
         if ( !rename($this->temp_path, $this->path) ) {
+            $this->close();
             throw new \Exception("Error renaming tmp file");
         }        
-        
+
         // close and remove lock
         $this->close();
+        
+        throw new \Exception("Error renaming tmp file");
         
         return true;
     }
