@@ -7,7 +7,6 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-use SAS\IRAD\FileStorageBundle\Storage\EncryptedFileStorage;
 
 class EncryptPasswordCommand extends ContainerAwareCommand {
 
@@ -55,11 +54,20 @@ class EncryptPasswordCommand extends ContainerAwareCommand {
             throw new \Exception("Password file \"$pw_file\" already exists.");
         }
         
-        $dialog   = $this->getHelperSet()->get('dialog');
-        $password = $dialog->askHiddenResponse($output, 'Enter password to encrypt');
-
+        $dialog    = $this->getHelperSet()->get('dialog');
+        $password1 = $dialog->askHiddenResponse($output, 'Enter password to encrypt: ');
+        $password2 = $dialog->askHiddenResponse($output, 'Retype password to confirm: ');
+        
+        if ( $password1 !== $password2 ) {
+            throw new \Exception("Password entries did not match!");
+        }
+        
         $encrypted = $this->getContainer()->get('file.encrypted_storage');
-        $storage = $encrypted->init($pw_file, array('public' => $public_key_path, 'private' => $private_key_path));
+        
+        $keys = array('public_key'  => $public_key_path, 
+                      'private_key' => $private_key_path);
+        
+        $storage = $encrypted->init($pw_file, $keys); 
         $storage->save($password);
         
         chmod($pw_file, 0660);
