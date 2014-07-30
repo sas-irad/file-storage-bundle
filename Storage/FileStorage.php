@@ -202,7 +202,7 @@ class FileStorage {
     /**
      * Close and unlock the storage file
      */
-    private function close() {
+    public function close() {
         if ($this->fh) {
             flock($this->fh, LOCK_UN);
             fclose($this->fh);
