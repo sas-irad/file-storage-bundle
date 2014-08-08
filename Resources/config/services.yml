@@ -1,7 +1,14 @@
+parameters:
+    file_storage:
+        keys:
+            public:   "%kernel.root_dir%/config/keys/public.pem"
+            private:  "%kernel.root_dir%/config/keys/private.pem"
+
 services:
 
-    file.storage:
+    storage.file:
         class:  SAS\IRAD\FileStorageBundle\Service\FileStorageService
         
-    file.encrypted_storage:
+    storage.encrypted:
         class:  SAS\IRAD\FileStorageBundle\Service\EncryptedFileStorageService
+        arguments:  [ "%file_storage%" ]
