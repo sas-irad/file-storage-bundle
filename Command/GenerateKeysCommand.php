@@ -42,7 +42,6 @@ class GenerateKeysCommand extends ContainerAwareCommand {
         }
         
         $key_path = realpath($key_path);
-        echo "Key path: $key_path\n";
         
         // path for public and private keys
         $public_key_path  = "$key_path/public.pem";
