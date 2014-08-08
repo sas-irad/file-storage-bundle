@@ -3,7 +3,7 @@
 	"type" : "symfony-bundle",
 	"description" : "Bundle for file locking / decrypting",
 	"license" : "Apache-2.0",
-	"minimum-stability" : "dev",
+	"minimum-stability" : "stable",
 	"authors" : [{
 			"name" : "Roberto Mansfield",
 			"email" : "robertom@sas.upenn.edu"
@@ -13,7 +13,12 @@
 		"php" : ">=5.3.2"
 	},
 	"require-dev" : {
-		"symfony/framework-bundle" : ">=2.1,<2.2-dev"
+		"symfony/framework-bundle" : ">=2.4,<2.5-dev",
+        "symfony/class-loader" : ">=2.4,<2.5-dev",
+		"symfony/console" : ">=2.4,<2.5-dev",
+		"symfony/debug" : ">=2.4,<2.5-dev",
+        "symfony/finder" : ">=2.4,<2.5-dev",
+		"symfony/yaml" : ">=2.4,<2.5-dev"
 	},
 	"autoload" : {
 		"psr-4" : {
@@ -21,13 +26,8 @@
 		}
 	},
 	"repositories" : [{
-			"type" : "git",
-			"url" : "https://github.com/sas-irad/file-storage-bundle/archive/master.zip",
-			"name" : "dev-master"
-		}, {
-			"type" : "git",
-			"url" : "https://github.com/sas-irad/file-storage-bundle/archive/v0.1.0.zip",
-			"name" : "0.1.0"
-		}
+            "type" : "vcs",
+            "url" : "https://github.com/sas-irad/file-storage-bundle"
+        }
 	]
 }
