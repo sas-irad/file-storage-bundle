@@ -6,7 +6,13 @@ use SAS\IRAD\FileStorageBundle\Storage\EncryptedFileStorage;
 
 class EncryptedFileStorageService {
     
-    public function init($path, $params) {
-        return new EncryptedFileStorage($path, $params);
+    private $params;
+    
+    public function __construct($params) {
+        $this->params = $params;
+    }
+    
+    public function init($path) {
+        return new EncryptedFileStorage($path, $this->params);
     }
 }
