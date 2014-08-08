@@ -28,12 +28,21 @@ class GenerateKeysCommand extends ContainerAwareCommand {
         if ( !$key_path ) {
             $root_dir = $this->getContainer()->get('kernel')->getRootDir();
             $key_path = "$root_dir/config/keys";
+        } else {
+            if ( strpos($key_path, '~') !== false ) {
+                throw new \Exception("Tilde characters in a path are not supported by this script.");
+            }
         }
         
         // create our "keys" directory if it doesn't exist
         if ( !is_dir($key_path) ) {
-            mkdir($key_path, 0770, true);
+            if ( !mkdir($key_path, 0770, true) ) {
+                throw new \Exception("Unable to create directory $key_path");
+            }
         }
+        
+        $key_path = realpath($key_path);
+        echo "Key path: $key_path\n";
         
         // path for public and private keys
         $public_key_path  = "$key_path/public.pem";
@@ -41,7 +50,7 @@ class GenerateKeysCommand extends ContainerAwareCommand {
 
         // don't overwrite keys if they already exist
         if ( file_exists($public_key_path) || file_exists($private_key_path) ) {
-            throw new \Exception("Key files already exist. Please remove before generating new keys.");
+            throw new \Exception("Key files already exist in $key_path. Please remove before generating new keys.");
             exit;
         }
         
