@@ -13,30 +13,34 @@ class EncryptedFileStorage {
      * Constructor
      * @param string $path the full file path for the storage file
      */
-    public function __construct($path, Array $params) {
+    public function __construct($path, array $params) {
 
-        $this->storage = new FileStorage($path);
-
-        foreach ( array('public_key', 'private_key') as $key ) {
-            if ( !isset($params[$key]) ) {
-                throw new \Exception("Required option \"$key\" for EncryptedFileStorage not passed");
+        if ( !isset($params['keys']) ) {
+            throw new \Exception("Required option keys for EncryptedFileStorage not passed");
+        }
+        
+        foreach ( array('public', 'private') as $key_type ) {
+            if ( !isset($params['keys'][$key_type]) ) {
+                throw new \Exception("Required option keys.\"$key_type\" for EncryptedFileStorage not passed");
             }
-            if ( !is_readable($params[$key]) ) {
-                throw new \Exception("Key file \"$key\" is not readable");
+            if ( !is_readable($params['keys'][$key_type]) ) {
+                throw new \Exception("Key file \"{$params['keys'][$key_type]}\" is not readable");
             }            
         }
         
-        $private_key = file_get_contents($params['private_key']);
+        $private_key = file_get_contents($params['keys']['private']);
         $this->privateKey = openssl_pkey_get_private($private_key);
         if ( !is_resource($this->privateKey) ) {
-            throw new \Exception("Unable to parse private key: {$params['private_key']}");
+            throw new \Exception("Unable to parse private key: {$params['keys']['private']}");
         }
         
-        $public_key = file_get_contents($params['public_key']);
+        $public_key = file_get_contents($params['keys']['public']);
         $this->publicKey = openssl_pkey_get_public($public_key);
         if ( !is_resource($this->publicKey) ) {
-            throw new \Exception("Unable to parse public key: {$params['public_key']}");
+            throw new \Exception("Unable to parse public key: {$params['keys']['public']}");
         }
+        
+        $this->storage = new FileStorage($path);
     }
     
     public function get() {
