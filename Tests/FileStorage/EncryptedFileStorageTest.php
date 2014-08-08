@@ -11,8 +11,9 @@ class EncryptedFileStorageTest extends PHPUnit_Framework_TestCase {
         
         $this->test_root = dirname(__DIR__);
         
-        $this->keys = array('public_key'  => $this->test_root . "/Resources/public.pem",
-                            'private_key' => $this->test_root . "/Resources/private.pem");
+        $this->keys = array('keys' => 
+                        array('public'  => $this->test_root . "/Resources/public.pem",
+                              'private' => $this->test_root . "/Resources/private.pem"));
     }
     
     /**
