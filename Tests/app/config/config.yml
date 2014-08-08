@@ -1,0 +1,9 @@
+framework:
+    secret:          "bogus/secret/for/dev/environement"
+    form:            ~
+    csrf_protection: ~
+    validation:      { enable_annotations: true }
+    session:
+        handler_id:  ~
+    fragments:       ~
+    http_method_override: true
