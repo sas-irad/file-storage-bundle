@@ -46,9 +46,10 @@ class FileStorageTest extends PHPUnit_Framework_TestCase {
     public function testFilePathException() {
         
         $testPath = "/etc/file-storage-test.txt";
+        $storage = new FileStorage($testPath);
         
         try {
-            $storage = new FileStorage($testPath);
+            $storage->save("This should raise an exception");
         } catch (Exception $e) {
             return;
         }

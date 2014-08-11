@@ -38,8 +38,8 @@ class FileStorage {
 
         $this->path = $path;
         
-        // can we write to the file or its directory?
-        if ( !is_writable($this->path) && !is_writable(dirname($this->path)) ) {
+        // can we read the file/directory?
+        if ( !is_readable($this->path) && !is_readable(dirname($this->path)) ) {
             throw new \Exception("Storage file {$this->path} is not writable.");
         }        
     }
@@ -228,4 +228,21 @@ class FileStorage {
 		}
 		return $fhw;
 	}
+	
+	/**
+	 * For write locks, we need to test if the file is writable
+	 * @return boolean
+	 */
+	private function isWritable() {
+	    if ( file_exists($this->path) && is_writable($this->path) ) {
+	        // file exists and is writable
+	        return true;
+	    } elseif ( is_writable(dirname($this->path)) ) {
+	        // file doesn't exist, but we can write to directory
+	        return true;
+	    } else {
+	        throw new \Exception("Storage file {$this->path} is not writable.");
+	    }
+	}
+	
 }
