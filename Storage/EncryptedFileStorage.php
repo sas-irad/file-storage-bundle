@@ -59,6 +59,10 @@ class EncryptedFileStorage {
         return $this->storage->saveAndRelease($this->encryptData($data));
     }
     
+    public function delete() {
+        return $this->storage->delete();
+    }
+    
     public function encryptData($data) {
         $encrypted = null;
         openssl_public_encrypt($data, $encrypted, $this->publicKey);
